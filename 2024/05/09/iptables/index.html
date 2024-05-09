@@ -1,0 +1,705 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Doe">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="一、iptables：从这里开始 删除现有规则 iptables -F (OR) iptables –flush 设置默认链策略 iptables的filter表中有三种链：INPUT, FORWARD和OUTPUT。默认的链策略是ACCEPT，你可以将它们设置成DROP。 iptables -P INPUT DROP iptables -P FORWARD DROP iptables -P OU">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/2024/05/09/iptables/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、iptables：从这里开始 删除现有规则 iptables -F (OR) iptables –flush 设置默认链策略 iptables的filter表中有三种链：INPUT, FORWARD和OUTPUT。默认的链策略是ACCEPT，你可以将它们设置成DROP。 iptables -P INPUT DROP iptables -P FORWARD DROP iptables -P OU">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-05-09T03:18:17.987Z">
+<meta property="article:modified_time" content="2024-01-09T07:58:56.823Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.7","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>Home</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>Archives</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>Categories</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>Tags</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>About</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text=""></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-05-09 11:18" pubdate>
+          May 9, 2024 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.4k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          12 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header"></h1>
+            
+            
+              <div class="markdown-body">
+                
+                <p><strong>一、iptables：从这里开始</strong></p>
+<p>删除现有规则</p>
+<p>iptables -F</p>
+<p>(OR)</p>
+<p>iptables –flush</p>
+<p>设置默认链策略</p>
+<p>iptables的filter表中有三种链：INPUT, FORWARD和OUTPUT。默认的链策略是ACCEPT，你可以将它们设置成DROP。</p>
+<p>iptables -P INPUT DROP</p>
+<p>iptables -P FORWARD DROP</p>
+<p>iptables -P OUTPUT DROP #一般出站连接设置为ACEEPT，看需求</p>
+<p>允许来自外部的ping测试</p>
+<p>iptables -A INPUT -p icmp –icmp-type echo-request -j ACCEPT</p>
+<p>iptables -A OUTPUT -p icmp –icmp-type echo-reply -j ACCEPT</p>
+<p>允许从本机ping外部主机</p>
+<p>iptables -A OUTPUT -p icmp –icmp-type echo-request -j ACCEPT</p>
+<p>iptables -A INPUT -p icmp –icmp-type echo-reply -j ACCEPT</p>
+<p><strong>二、iptables：协议与端口设定</strong></p>
+<p>允许所有SSH连接请求</p>
+<p>本规则允许所有来自外部的SSH连接请求，也就是说，只允许进入eth0接口，并且目的端口为22的数据包</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许从本地发起的SSH连接</p>
+<p>本规则和上述规则有所不同，本规则意在允许本机发起SSH连接，上面的规则与此正好相反。</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A INPUT -i eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>仅允许来自指定网络的SSH连接请求</p>
+<p>以下规则仅允许来自192.168.100.0&#x2F;24的网络：</p>
+<p>iptables -A INPUT -i eth0 -p tcp -s 192.168.100.0&#x2F;24 –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>上例中，你也可以使用-s 192.168.100.0&#x2F;255.255.255.0作为网络地址。当然使用上面的CIDR地址更容易让人明白。</p>
+<p>仅允许从本地发起到指定网络的SSH连接请求</p>
+<p>以下规则仅允许从本地主机连接到192.168.100.0&#x2F;24的网络：</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp -d 192.168.100.0&#x2F;24 –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A INPUT -i eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT允许HTTP&#x2F;HTTPS连接请求</p>
+<p>允许HTTP连接：80端口</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 80 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 80 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许HTTPS连接：443端口</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 443 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 443 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许从本地发起HTTPS连接</p>
+<p>本规则可以允许用户从本地主机发起HTTPS连接，从而访问Internet。</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –dport 443 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A INPUT -i eth0 -p tcp –sport 443 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>类似的，你可以设置允许HTTP协议（80端口）。</p>
+<p>-m multiport：指定多个端口</p>
+<p>通过指定-m multiport选项，可以在一条规则中同时允许SSH、HTTP、HTTPS连接：</p>
+<p>iptables -A INPUT -i eth0 -p tcp -m multiport –dports 22,80,443 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp -m multiport –sports 22,80,443 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许出站DNS连接</p>
+<p>iptables -A OUTPUT -p udp -o eth0 –dport 53 -j ACCEPT</p>
+<p>iptables -A INPUT -p udp -i eth0 –sport 53 -j ACCEPT</p>
+<p>防止DoS攻击</p>
+<p>iptables -A INPUT -p tcp –dport 80 -m limit –limit 25&#x2F;minute –limit-burst 100 -j ACCEPT</p>
+<p>-m limit: 启用limit扩展</p>
+<p>–limit 25&#x2F;minute: 允许最多每分钟25个连接</p>
+<p>–limit-burst 100: 当达到100个连接后，才启用上述25&#x2F;minute限制</p>
+<p><strong>三、转发与NAT</strong></p>
+<p>允许路由</p>
+<p>如果本地主机有两块网卡，一块连接内网(eth0)，一块连接外网(eth1)，那么可以使用下面的规则将eth0的数据路由到eht1：</p>
+<p>iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT</p>
+<p>MAC和地址的绑定</p>
+<p>iptables -A FORWARD -s 192.18.30.10 -m mac –mac-source 00:13:21:25:E5:C8 -j ACCEPT</p>
+<p>DNAT与端口转发</p>
+<p>以下规则将会把来自422端口的流量转发到22端口。这意味着来自422端口的SSH连接请求与来自22端口的请求等效。</p>
+<p>1.启用DNAT转发</p>
+<p>iptables -t nat -A PREROUTING -p tcp -d 192.168.102.37 –dport 422 -j DNAT –to-destination 192.168.102.37:22</p>
+<p>允许连接到422端口的请求</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 422 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 422 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>假设现在外网网关是xxx.xxx.xxx.xxx，那么如果我们希望把HTTP请求转发到内部的某一台计算机，应该怎么做呢？</p>
+<p>iptables -t nat -A PREROUTING -p tcp -i eth0 -d xxx.xxx.xxx.xxx –dport 8888 -j DNAT –to 192.168.0.2:80</p>
+<p>iptables -A FORWARD -p tcp -i eth0 -d 192.168.0.2 –dport 80 -j ACCEPT</p>
+<p>当该数据包到达xxx.xxx.xxx.xxx后，需要将该数据包转发给192.168.0.2的80端口，事实上NAT所做的是修改该数据包的目的地址和目的端口号。然后再将该数据包路由给对应的主机。</p>
+<p>但是iptables会接受这样的需要路由的包么？这就由FORWARD链决定。我们通过第二条命令告诉iptables可以转发目的地址为192.168.0.2:80的数据包。再看一下上例中422端口转22端口，这是同一IP，因此不需要设置FORWARD链。</p>
+<p> 2.SNAT与MASQUERADE</p>
+<p>如下命令表示把所有10.8.0.0网段的数据包SNAT成192.168.5.3的ip然后发出去：</p>
+<p>iptables -t nat -A POSTROUTING -s 10.8.0.0&#x2F;24 -o eth0 -j snat –to-source 192.168.5.3</p>
+<p>对于snat，不管是几个地址，必须明确的指定要snat的IP。假如我们的计算机使用ADSL拨号方式上网，那么外网IP是动态的，这时候我们可以考虑使用MASQUERADE</p>
+<p>iptables -t nat -A POSTROUTING -s 10.8.0.0&#x2F;255.255.255.0 -o eth0 -j MASQUERADE</p>
+<p>负载平衡</p>
+<p>可以利用iptables的-m nth扩展，及其参数（–counter 0 –every 3 –packet x），进行DNAT路由设置（-A PREROUTING -j DNAT –to-destination），从而将负载平均分配给3台服务器：</p>
+<p>iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state –state NEW -m nth –counter 0 –every 3 –packet 0 -j DNAT –to-destination 192.168.1.101:443</p>
+<p>iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state –state NEW -m nth –counter 0 –every 3 –packet 1 -j DNAT –to-destination 192.168.1.102:443</p>
+<p>iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state –state NEW -m nth –counter 0 –every 3 –packet 2 -j DNAT –to-destination 192.168.1.103:443</p>
+<p>自定义的链记录丢弃的数据包</p>
+<p> 1.新建名为LOGGING的链</p>
+<p>iptables -t nat -N BLUCK</p>
+<p>iptables -t nat -F BLUCK</p>
+<p>2.将所有来自POSTROUTING 链中的数据包跳转到BLUCK链中</p>
+<p>iptables -t nat -A POSTROUTING -j BLUCK</p>
+<p>3.指定自定义规则</p>
+<p>iptables -t nat -A BLUCK  -s 192.168.30.0&#x2F;24 -o eth0 -j MASQUERADE </p>
+<p>.</p>
+<p>URL过滤</p>
+<p>方法1.字符匹配过滤</p>
+<p>iptables -t filter -I FORWARD -p tcp -m string –algo kmp –string “<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>“ –dport 443 -j DROP </p>
+<p>iptables -t filter -I FORWARD -p tcp -m string –algo kmp –string “<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>“ –dport 80-j DROP</p>
+<p>方法2.原目地址过滤</p>
+<p>iptables -t filter -I FORWARD -s xxx.xxx.xxx.xxx -j DROP </p>
+<p>iptables -t filter -I FORWARD 2 -d xxx.xxx.xxx.xxx -j DROP</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div></div>
+      <div>http://example.com/2024/05/09/iptables/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Doe</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>May 9, 2024</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>Table of Contents</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
