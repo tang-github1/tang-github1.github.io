@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Tjane&#39;s blogs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Tjane&#39;s blogs</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/tags">Tags</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-iptables" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/09/iptables/" class="article-date">
+  <time class="dt-published" datetime="2024-05-09T03:18:17.987Z" itemprop="datePublished">2024-05-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p><strong>一、iptables：从这里开始</strong></p>
+<p>删除现有规则</p>
+<p>iptables -F</p>
+<p>(OR)</p>
+<p>iptables –flush</p>
+<p>设置默认链策略</p>
+<p>iptables的filter表中有三种链：INPUT, FORWARD和OUTPUT。默认的链策略是ACCEPT，你可以将它们设置成DROP。</p>
+<p>iptables -P INPUT DROP</p>
+<p>iptables -P FORWARD DROP</p>
+<p>iptables -P OUTPUT DROP #一般出站连接设置为ACEEPT，看需求</p>
+<p>允许来自外部的ping测试</p>
+<p>iptables -A INPUT -p icmp –icmp-type echo-request -j ACCEPT</p>
+<p>iptables -A OUTPUT -p icmp –icmp-type echo-reply -j ACCEPT</p>
+<p>允许从本机ping外部主机</p>
+<p>iptables -A OUTPUT -p icmp –icmp-type echo-request -j ACCEPT</p>
+<p>iptables -A INPUT -p icmp –icmp-type echo-reply -j ACCEPT</p>
+<p><strong>二、iptables：协议与端口设定</strong></p>
+<p>允许所有SSH连接请求</p>
+<p>本规则允许所有来自外部的SSH连接请求，也就是说，只允许进入eth0接口，并且目的端口为22的数据包</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许从本地发起的SSH连接</p>
+<p>本规则和上述规则有所不同，本规则意在允许本机发起SSH连接，上面的规则与此正好相反。</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A INPUT -i eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>仅允许来自指定网络的SSH连接请求</p>
+<p>以下规则仅允许来自192.168.100.0&#x2F;24的网络：</p>
+<p>iptables -A INPUT -i eth0 -p tcp -s 192.168.100.0&#x2F;24 –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>上例中，你也可以使用-s 192.168.100.0&#x2F;255.255.255.0作为网络地址。当然使用上面的CIDR地址更容易让人明白。</p>
+<p>仅允许从本地发起到指定网络的SSH连接请求</p>
+<p>以下规则仅允许从本地主机连接到192.168.100.0&#x2F;24的网络：</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp -d 192.168.100.0&#x2F;24 –dport 22 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A INPUT -i eth0 -p tcp –sport 22 -m state –state ESTABLISHED -j ACCEPT允许HTTP&#x2F;HTTPS连接请求</p>
+<p>允许HTTP连接：80端口</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 80 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 80 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许HTTPS连接：443端口</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 443 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 443 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许从本地发起HTTPS连接</p>
+<p>本规则可以允许用户从本地主机发起HTTPS连接，从而访问Internet。</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –dport 443 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A INPUT -i eth0 -p tcp –sport 443 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>类似的，你可以设置允许HTTP协议（80端口）。</p>
+<p>-m multiport：指定多个端口</p>
+<p>通过指定-m multiport选项，可以在一条规则中同时允许SSH、HTTP、HTTPS连接：</p>
+<p>iptables -A INPUT -i eth0 -p tcp -m multiport –dports 22,80,443 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp -m multiport –sports 22,80,443 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>允许出站DNS连接</p>
+<p>iptables -A OUTPUT -p udp -o eth0 –dport 53 -j ACCEPT</p>
+<p>iptables -A INPUT -p udp -i eth0 –sport 53 -j ACCEPT</p>
+<p>防止DoS攻击</p>
+<p>iptables -A INPUT -p tcp –dport 80 -m limit –limit 25&#x2F;minute –limit-burst 100 -j ACCEPT</p>
+<p>-m limit: 启用limit扩展</p>
+<p>–limit 25&#x2F;minute: 允许最多每分钟25个连接</p>
+<p>–limit-burst 100: 当达到100个连接后，才启用上述25&#x2F;minute限制</p>
+<p><strong>三、转发与NAT</strong></p>
+<p>允许路由</p>
+<p>如果本地主机有两块网卡，一块连接内网(eth0)，一块连接外网(eth1)，那么可以使用下面的规则将eth0的数据路由到eht1：</p>
+<p>iptables -A FORWARD -i eth0 -o eth1 -j ACCEPT</p>
+<p>MAC和地址的绑定</p>
+<p>iptables -A FORWARD -s 192.18.30.10 -m mac –mac-source 00:13:21:25:E5:C8 -j ACCEPT</p>
+<p>DNAT与端口转发</p>
+<p>以下规则将会把来自422端口的流量转发到22端口。这意味着来自422端口的SSH连接请求与来自22端口的请求等效。</p>
+<p>1.启用DNAT转发</p>
+<p>iptables -t nat -A PREROUTING -p tcp -d 192.168.102.37 –dport 422 -j DNAT –to-destination 192.168.102.37:22</p>
+<p>允许连接到422端口的请求</p>
+<p>iptables -A INPUT -i eth0 -p tcp –dport 422 -m state –state NEW,ESTABLISHED -j ACCEPT</p>
+<p>iptables -A OUTPUT -o eth0 -p tcp –sport 422 -m state –state ESTABLISHED -j ACCEPT</p>
+<p>假设现在外网网关是xxx.xxx.xxx.xxx，那么如果我们希望把HTTP请求转发到内部的某一台计算机，应该怎么做呢？</p>
+<p>iptables -t nat -A PREROUTING -p tcp -i eth0 -d xxx.xxx.xxx.xxx –dport 8888 -j DNAT –to 192.168.0.2:80</p>
+<p>iptables -A FORWARD -p tcp -i eth0 -d 192.168.0.2 –dport 80 -j ACCEPT</p>
+<p>当该数据包到达xxx.xxx.xxx.xxx后，需要将该数据包转发给192.168.0.2的80端口，事实上NAT所做的是修改该数据包的目的地址和目的端口号。然后再将该数据包路由给对应的主机。</p>
+<p>但是iptables会接受这样的需要路由的包么？这就由FORWARD链决定。我们通过第二条命令告诉iptables可以转发目的地址为192.168.0.2:80的数据包。再看一下上例中422端口转22端口，这是同一IP，因此不需要设置FORWARD链。</p>
+<p> 2.SNAT与MASQUERADE</p>
+<p>如下命令表示把所有10.8.0.0网段的数据包SNAT成192.168.5.3的ip然后发出去：</p>
+<p>iptables -t nat -A POSTROUTING -s 10.8.0.0&#x2F;24 -o eth0 -j snat –to-source 192.168.5.3</p>
+<p>对于snat，不管是几个地址，必须明确的指定要snat的IP。假如我们的计算机使用ADSL拨号方式上网，那么外网IP是动态的，这时候我们可以考虑使用MASQUERADE</p>
+<p>iptables -t nat -A POSTROUTING -s 10.8.0.0&#x2F;255.255.255.0 -o eth0 -j MASQUERADE</p>
+<p>负载平衡</p>
+<p>可以利用iptables的-m nth扩展，及其参数（–counter 0 –every 3 –packet x），进行DNAT路由设置（-A PREROUTING -j DNAT –to-destination），从而将负载平均分配给3台服务器：</p>
+<p>iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state –state NEW -m nth –counter 0 –every 3 –packet 0 -j DNAT –to-destination 192.168.1.101:443</p>
+<p>iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state –state NEW -m nth –counter 0 –every 3 –packet 1 -j DNAT –to-destination 192.168.1.102:443</p>
+<p>iptables -A PREROUTING -i eth0 -p tcp –dport 443 -m state –state NEW -m nth –counter 0 –every 3 –packet 2 -j DNAT –to-destination 192.168.1.103:443</p>
+<p>自定义的链记录丢弃的数据包</p>
+<p> 1.新建名为LOGGING的链</p>
+<p>iptables -t nat -N BLUCK</p>
+<p>iptables -t nat -F BLUCK</p>
+<p>2.将所有来自POSTROUTING 链中的数据包跳转到BLUCK链中</p>
+<p>iptables -t nat -A POSTROUTING -j BLUCK</p>
+<p>3.指定自定义规则</p>
+<p>iptables -t nat -A BLUCK  -s 192.168.30.0&#x2F;24 -o eth0 -j MASQUERADE </p>
+<p>.</p>
+<p>URL过滤</p>
+<p>方法1.字符匹配过滤</p>
+<p>iptables -t filter -I FORWARD -p tcp -m string –algo kmp –string “<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>“ –dport 443 -j DROP </p>
+<p>iptables -t filter -I FORWARD -p tcp -m string –algo kmp –string “<a target="_blank" rel="noopener" href="http://www.baidu.com/">www.baidu.com</a>“ –dport 80-j DROP</p>
+<p>方法2.原目地址过滤</p>
+<p>iptables -t filter -I FORWARD -s xxx.xxx.xxx.xxx -j DROP </p>
+<p>iptables -t filter -I FORWARD 2 -d xxx.xxx.xxx.xxx -j DROP</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/09/iptables/" data-id="clyg2j0vg0000r49e9vxqh0ld" data-title="" class="article-share-link">分享</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+</section>
+        <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/05/09/iptables/">(no title)</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">五月 2024</a></li></ul>
+    </div>
+  </div>
+
+  
+</aside>
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2024 By Autoload<br>
+      Driven - <a href="https://hexo.io/" target="_blank">Hexo</a>|Theme - <a href="https://github.com/autoload/hexo-theme-auto" target="_blank">Auto</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/tags" class="mobile-nav-link">Tags</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
